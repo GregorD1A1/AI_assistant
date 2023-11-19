@@ -35,9 +35,10 @@ def create_record(link, summary, tags):
     requests.post(url, headers=auth_header, data=json.dumps(data))
 
 
-article_link = "https://www.promptingguide.ai/techniques/tot"
+article_link = "https://bravecourses.circle.so/c/dyskusja/kilka-nieoczywistych-elementow-aplikacji-korzystajacych-z-llm"
 loader = WebBaseLoader(article_link)
 docs = loader.load()[0]
+print(docs)
 
 gpt_35 = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 # filtering
