@@ -8,10 +8,9 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def execute():
     body = request.get_json()
-    logging.info(body)
     tool_choice(body['message'])
 
-    return body['message']
+    return "ok"
 
 
 if __name__ == '__main__':

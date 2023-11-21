@@ -5,6 +5,7 @@ from langchain.pydantic_v1 import BaseModel, Field
 from typing import Optional
 import requests
 from datetime import datetime
+import telegram_con
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -28,6 +29,7 @@ def add_task(name: str, decription: str, date: OptionalDate):
         request_body['date'] = date
 
     requests.post(task_hook, json=request_body)
+    telegram_con.send_msg(f'Added task: {name} to todo list')
 
 def dzik():
     """call that function if user get bored"""
