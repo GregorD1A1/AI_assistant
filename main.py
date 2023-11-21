@@ -11,6 +11,8 @@ def execute():
     logging.info(body)
     tool_choice(body['message'])
 
+    return body['message']
+
 
 if __name__ == '__main__':
     app.run(debug=True)
