@@ -1,5 +1,6 @@
 from flask import Flask, request
 from tool_choice import tool_choice
+import logging
 
 app = Flask(__name__)
 
@@ -7,8 +8,7 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def execute():
     body = request.json()
-    print('Got request with body:')
-    print(body)
+    logging.info(body)
     tool_choice(body['message'])
 
 
