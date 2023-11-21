@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
 def execute():
-    body = request.json()
+    body = request.get_json()
     logging.info(body)
     tool_choice(body['message'])
 
