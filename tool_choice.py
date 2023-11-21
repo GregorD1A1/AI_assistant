@@ -29,7 +29,7 @@ def add_task(name: str, decription: str, date: OptionalDate):
         request_body['date'] = date
 
     requests.post(task_hook, json=request_body)
-    telegram_con.send_msg(f'Added task: {name} to todo list')
+    #telegram_con.send_msg(f'Added task: {name} to todo list')
 
 def dzik():
     """call that function if user get bored"""

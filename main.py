@@ -1,6 +1,6 @@
 from flask import Flask, request
 from tool_choice import tool_choice
-import logging
+import sys
 
 app = Flask(__name__)
 
@@ -9,6 +9,7 @@ app = Flask(__name__)
 def execute():
     body = request.get_json()
     tool_choice(body['message'])
+    sys.stdout.write("dzik")
 
     return "ok"
 
