@@ -27,7 +27,7 @@ class OptionalDate(BaseModel):
 
 def add_task(name: str, description: str, date: OptionalDate):
     """Add task to todo list."""
-    request_body = {'action': 'add', 'name': name, 'description': description}
+    request_body = {'action': 'add_task', 'name': name, 'description': description}
     date = date['date']
     if date:
         request_body['date'] = date
@@ -37,13 +37,13 @@ def add_task(name: str, description: str, date: OptionalDate):
 
 def list_tasks():
     """call that function if user asked you to list all the tasks"""
-    request_body = {'action': 'list'}
+    request_body = {'action': 'list_tasks'}
     requests.post(task_hook, json=request_body)
 
 
 def add_memory(memory: str):
     """Add memory piece to memory base to remember it."""
-    request_body = {'action': 'add', 'memory': memory, 'id': str(uuid.uuid4())}
+    request_body = {'action': 'add_memory', 'memory': memory, 'id': str(uuid.uuid4())}
     requests.post(momories_hook, json=request_body)
 
 
