@@ -14,7 +14,7 @@ def execute():
     return "ok"
 
 
-@app.route('/aidevs_api')
+@app.route('/aidevs_api', methods=['POST'])
 def aidevs_api():
     body = request.get_json()
     sys.stdout.write(f"Request received:\n{body}\n")
