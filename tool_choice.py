@@ -11,6 +11,9 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
+
+
 class OptionalDate(BaseModel):
     """Either a date or null."""
 
@@ -20,10 +23,10 @@ class OptionalDate(BaseModel):
                     "null if no date provided in user input",
     )
 
+
 def add_task(name: str, decription: str, date: OptionalDate):
     """Add task to todo list."""
-    task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
-    request_body = {'name': name, 'description': decription}
+    request_body = {'action': 'add', 'name': name, 'description': decription}
     date = date['date']
     if date:
         request_body['date'] = date
@@ -31,9 +34,11 @@ def add_task(name: str, decription: str, date: OptionalDate):
     requests.post(task_hook, json=request_body)
     #telegram_con.send_msg(f'Added task: {name} to todo list')
 
-def dzik():
-    """call that function if user get bored"""
-    print("dzik")
+
+def list_tasks():
+    """call that function if user asked you to list all the tasks"""
+    request_body = {'action': 'list'}
+    requests.post(task_hook, json=request_body)
 
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
@@ -43,7 +48,7 @@ prompt = ChatPromptTemplate.from_messages(
         ("user", "User input:'''{input}'''"),
     ]
 )
-runnable = create_openai_fn_runnable([add_task, dzik], llm, prompt)
+runnable = create_openai_fn_runnable([add_task, list_tasks], llm, prompt)
 
 
 def tool_choice(user_input):

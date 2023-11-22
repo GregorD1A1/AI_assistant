@@ -9,7 +9,7 @@ app = Flask(__name__)
 def execute():
     body = request.get_json()
     tool_choice(body['message'])
-    sys.stdout.write("dzik")
+    sys.stdout.write("Request received.\n")
 
     return "ok"
 
