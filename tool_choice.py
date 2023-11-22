@@ -7,6 +7,7 @@ import requests
 from datetime import datetime
 import uuid
 import telegram_con
+import sys
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -60,4 +61,6 @@ runnable = create_openai_fn_runnable([add_task, list_tasks, add_memory], llm, pr
 def tool_choice(user_input):
     output = runnable.invoke({"input": user_input})
     # run function
-    globals()[output["name"]](**output["arguments"])
+    function_name = output["name"]
+    sys.stdout.write(f"LLM returned:\n{output}")
+    globals()[function_name](**output["arguments"])
