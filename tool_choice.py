@@ -5,6 +5,7 @@ from langchain.pydantic_v1 import BaseModel, Field
 from typing import Optional
 import requests
 from datetime import datetime
+import uuid
 import telegram_con
 from dotenv import load_dotenv, find_dotenv
 
@@ -12,7 +13,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
-
+momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 
 class OptionalDate(BaseModel):
     """Either a date or null."""
@@ -24,21 +25,26 @@ class OptionalDate(BaseModel):
     )
 
 
-def add_task(name: str, decription: str, date: OptionalDate):
+def add_task(name: str, description: str, date: OptionalDate):
     """Add task to todo list."""
-    request_body = {'action': 'add', 'name': name, 'description': decription}
+    request_body = {'action': 'add', 'name': name, 'description': description}
     date = date['date']
     if date:
         request_body['date'] = date
 
     requests.post(task_hook, json=request_body)
-    #telegram_con.send_msg(f'Added task: {name} to todo list')
 
 
 def list_tasks():
     """call that function if user asked you to list all the tasks"""
     request_body = {'action': 'list'}
     requests.post(task_hook, json=request_body)
+
+
+def add_memory(memory: str):
+    """Add memory piece to memory base to remember it."""
+    request_body = {'action': 'add', 'memory': memory, 'id': str(uuid.uuid4())}
+    requests.post(momories_hook, json=request_body)
 
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
@@ -48,7 +54,7 @@ prompt = ChatPromptTemplate.from_messages(
         ("user", "User input:'''{input}'''"),
     ]
 )
-runnable = create_openai_fn_runnable([add_task, list_tasks], llm, prompt)
+runnable = create_openai_fn_runnable([add_task, list_tasks, add_memory], llm, prompt)
 
 
 def tool_choice(user_input):
