@@ -51,7 +51,8 @@ def add_memory(memory: str):
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are a helpful assistant. Remember, today is {datetime.today().strftime('%d-%m-%Y')}."),
+        ("system", f"You are a helpful assistant. Remember, today is {datetime.today().strftime('%d-%m-%Y')}."
+                   f" User name is Grigorij."),
         ("user", "User input:'''{input}'''"),
     ]
 )
