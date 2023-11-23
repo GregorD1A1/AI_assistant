@@ -55,7 +55,7 @@ def aidevs_api():
     ]
 
     response = client.chat.completions.create(
-        model="gpt-4-1106-preview",
+        model="gpt-4",
         messages=messages,
         tools=tools,
         tool_choice="auto",  # auto is default, but we'll be explicit
