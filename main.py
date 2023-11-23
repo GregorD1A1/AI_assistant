@@ -71,9 +71,11 @@ def aidevs_api():
     reply = response_message.content
     reply = "ok" if not reply else reply
 
-    sys.stdout.write(f"Response:\n{reply}\n")
 
-    return json.dumps({'reply': reply})
+    response = json.dumps({'reply': reply})
+    sys.stdout.write(response)
+
+    return response
 
 
 if __name__ == '__main__':
