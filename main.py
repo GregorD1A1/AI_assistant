@@ -30,7 +30,7 @@ def aidevs_api():
 
     # Step 1: send the conversation and available functions to the model
     messages = [{"role": "system", "content": notes}, {"role": "user", "content": question}]
-    sys.stdout.write(messages)
+    sys.stdout.write(notes)
     tools = [
         {
             "type": "function",
