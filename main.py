@@ -13,22 +13,66 @@ def execute():
 
     return "ok"
 
+notes = ""
+def save_note(note):
+    global notes
+    notes = notes.join(note + "\n")
 
 @app.route('/aidevs_api', methods=['POST'])
 def aidevs_api():
+    global notes
     body = request.get_json()
     sys.stdout.write(f"Request received:\n{body}\n")
     question = body['question']
-    from langchain.prompts import PromptTemplate
-    from langchain.chat_models import ChatOpenAI
-    from langchain.schema import StrOutputParser
+    from openai import OpenAI
     import json
-    prompt = PromptTemplate.from_template("respond the next question: {question}")
-    chain = prompt | ChatOpenAI() | StrOutputParser()
-    result = chain.invoke({'question': question})
-    sys.stdout.write(f"Response:\n{result}\n")
+    client = OpenAI()
 
-    return json.dumps({'reply': result})
+    # Step 1: send the conversation and available functions to the model
+    messages = [{"role": "system", "content": notes}, {"role": "user", "content": question}]
+    sys.stdout.write(messages)
+    tools = [
+        {
+            "type": "function",
+            "function":
+                {
+                    "name": "save_note",
+                    "description": "save information note if some information is provided",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "note": {
+                                "type": "string",
+                                "description": "information note",
+                            },
+                            "unit": {"type": "string"},
+                        },
+                        "required": ["note"],
+                    },
+                },
+        },
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=messages,
+        tools=tools,
+        tool_choice="auto",  # auto is default, but we'll be explicit
+    )
+    response_message = response.choices[0].message
+    tool_calls = response_message.tool_calls
+    # Step 2: check if the model wanted to call a function
+    if tool_calls:
+        function_name = tool_calls[0].function.name
+        function_args = json.loads(tool_calls[0].function.arguments)
+        globals()[function_name](**function_args)
+
+    reply = response_message.content
+    reply = "ok" if not reply else reply
+
+    sys.stdout.write(f"Response:\n{reply}\n")
+
+    return json.dumps({'reply': reply})
 
 
 if __name__ == '__main__':
