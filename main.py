@@ -13,10 +13,10 @@ def execute():
 
     return "ok"
 
-notes = ""
+notes = []
 def save_note(note):
     global notes
-    notes = notes.join(note + "\n")
+    notes.append(note)
 
 @app.route('/aidevs_api', methods=['POST'])
 def aidevs_api():
@@ -29,8 +29,9 @@ def aidevs_api():
     client = OpenAI()
 
     # Step 1: send the conversation and available functions to the model
-    messages = [{"role": "system", "content": notes}, {"role": "user", "content": question}]
-    sys.stdout.write(notes)
+    notesy = "\n".join(notes) if notes else ""
+    messages = [{"role": "system", "content": f"{notesy}\nAnswer question if user provided question; if it provided statement, save it as a note."}, {"role": "user", "content": f"User:'''{question}'''"}]
+    sys.stdout.write(notesy)
     tools = [
         {
             "type": "function",
