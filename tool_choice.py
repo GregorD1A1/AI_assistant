@@ -25,6 +25,31 @@ class OptionalDate(BaseModel):
                     "null if no date provided in user input",
     )
 
+class FriendsData(BaseModel):
+    """Data for friends."""
+
+    name: str = Field(
+        None,
+        description="name of friend",
+    )
+    description: str = Field(
+        None,
+        description="description of friend",
+    )
+    tags: str = Field(
+        None,
+        description="tags of friend, related to his interests, business, potential ways of cooperation. "
+                    "Separated by comma",
+    )
+    city: Optional[str] = Field(
+        None,
+        description="city friend lives",
+    )
+    contact: Optional[str] = Field(
+        None,
+        description="contact of friend",
+    )
+
 
 def add_task(name: str, description: str, date: OptionalDate):
     """Add task to todo list."""
@@ -47,12 +72,21 @@ def add_memory(memory: str):
     request_body = {'action': 'add_memory', 'memory': memory, 'id': str(uuid.uuid4())}
     requests.post(momories_hook, json=request_body)
 
+def add_friend(friends_data: FriendsData):
+    """Add friend to friends list."""
+    request_body = {'action': 'add_friend', 'name': friends_data.name, 'description': friends_data.description,
+                    'tags': friends_data.tags}
+    if friends_data.city:
+        request_body['city'] = friends_data.city
+    if friends_data.contact:
+        request_body['contact'] = friends_data.contact
+    sys.stdout.write("request_body")
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are a helpful assistant. Remember, today is {datetime.today().strftime('%d-%m-%Y')}."
-                   f" User name is Grigorij."),
+        ("system", f"You are , Grigorij's personal assistant. "
+                   f"Remember, today is {datetime.today().strftime('%d-%m-%Y')}."),
         ("user", "User input:'''{input}'''"),
     ]
 )
