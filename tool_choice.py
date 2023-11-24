@@ -34,7 +34,7 @@ class FriendsData(BaseModel):
     )
     description: str = Field(
         None,
-        description="description of friend",
+        description="description of friend's interests, business, potential ways of cooperation",
     )
     tags: str = Field(
         None,
@@ -43,11 +43,11 @@ class FriendsData(BaseModel):
     )
     city: Optional[str] = Field(
         None,
-        description="city friend lives",
+        description="city friend lives if given else null",
     )
     contact: Optional[str] = Field(
         None,
-        description="contact of friend",
+        description="contact of friend if given else null",
     )
 
 
@@ -74,13 +74,13 @@ def add_memory(memory: str):
 
 def add_friend(friends_data: FriendsData):
     """Add friend to friends list."""
-    request_body = {'action': 'add_friend', 'name': friends_data.name, 'description': friends_data.description,
-                    'tags': friends_data.tags}
-    if friends_data.city:
-        request_body['city'] = friends_data.city
-    if friends_data.contact:
-        request_body['contact'] = friends_data.contact
-    sys.stdout.write("request_body")
+    request_body = {'action': 'add_friend', 'name': friends_data['name'], 'description': friends_data['description'],
+                    'tags': friends_data['tags']}
+    if 'city' in friends_data:
+        request_body['city'] = friends_data['city']
+    if 'contact' in friends_data:
+        request_body['contact'] = friends_data['contact']
+    sys.stdout.write(str(request_body))
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
@@ -90,12 +90,14 @@ prompt = ChatPromptTemplate.from_messages(
         ("user", "User input:'''{input}'''"),
     ]
 )
-runnable = create_openai_fn_runnable([add_task, list_tasks, add_memory], llm, prompt)
+runnable = create_openai_fn_runnable([add_task, list_tasks, add_memory, add_friend], llm, prompt)
 
 
 def tool_choice(user_input):
     output = runnable.invoke({"input": user_input})
     # run function
     function_name = output["name"]
-    sys.stdout.write(f"LLM returned:\n{output}")
+    sys.stdout.write(f"LLM returned:\n{output}\n")
     globals()[function_name](**output["arguments"])
+
+tool_choice("Dodaj kolegę Andrzeja Lubelskiego, który lubi prgranować")
