@@ -15,6 +15,7 @@ load_dotenv(find_dotenv())
 
 task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
+friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
 
 class OptionalDate(BaseModel):
     """Either a date or null."""
@@ -67,20 +68,22 @@ def list_tasks():
     requests.post(task_hook, json=request_body)
 
 
-def add_memory(memory: str):
-    """Add memory piece to memory base to remember it."""
-    request_body = {'action': 'add_memory', 'memory': memory, 'id': str(uuid.uuid4())}
+def add_info(information: str):
+    """Add information piece to memory base to remember it. call that function if user provided affirmative statement."""
+    request_body = {'action': 'add_memory', 'memory': information, 'id': str(uuid.uuid4())}
     requests.post(momories_hook, json=request_body)
 
 def add_friend(friends_data: FriendsData):
     """Add friend to friends list."""
     request_body = {'action': 'add_friend', 'name': friends_data['name'], 'description': friends_data['description'],
-                    'tags': friends_data['tags']}
+                    'tags': friends_data['tags'], 'id': str(uuid.uuid4())}
     if 'city' in friends_data:
         request_body['city'] = friends_data['city']
     if 'contact' in friends_data:
         request_body['contact'] = friends_data['contact']
     sys.stdout.write(str(request_body))
+    requests.post(friends_hook, json=request_body)
+
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
@@ -90,7 +93,7 @@ prompt = ChatPromptTemplate.from_messages(
         ("user", "User input:'''{input}'''"),
     ]
 )
-runnable = create_openai_fn_runnable([add_task, list_tasks, add_memory, add_friend], llm, prompt)
+runnable = create_openai_fn_runnable([add_task, list_tasks, add_info, add_friend], llm, prompt)
 
 
 def tool_choice(user_input):
@@ -100,4 +103,4 @@ def tool_choice(user_input):
     sys.stdout.write(f"LLM returned:\n{output}\n")
     globals()[function_name](**output["arguments"])
 
-tool_choice("Dodaj kolegę Andrzeja Lubelskiego, który lubi prgranować")
+tool_choice("Dodaj kolegę Andrzeja Lubelskiego, który lubi prgranować, grać w piłkę nożną. Jest z warszawy.")
