@@ -102,5 +102,3 @@ def tool_choice(user_input):
     function_name = output["name"]
     sys.stdout.write(f"LLM returned:\n{output}\n")
     globals()[function_name](**output["arguments"])
-
-tool_choice("Dodaj kolegę Andrzeja Lubelskiego, który lubi prgranować, grać w piłkę nożną. Jest z warszawy.")
