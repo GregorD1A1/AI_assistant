@@ -52,6 +52,18 @@ class FriendsData(BaseModel):
     )
 
 
+class TaskDates(BaseModel):
+    """Start and end dates of task listing."""
+    start_date: Optional[str] = Field(
+        None,
+        description="start date of task listing in MM/DD/YYYY",
+    )
+    end_date: Optional[str] = Field(
+        None,
+        description="end date of task listing in MM/DD/YYYY",
+    )
+
+
 def add_task(name: str, description: str, date: OptionalDate):
     """Add task to todo list."""
     request_body = {'action': 'add_task', 'name': name, 'description': description}
@@ -62,9 +74,15 @@ def add_task(name: str, description: str, date: OptionalDate):
     requests.post(task_hook, json=request_body)
 
 
-def list_tasks():
+def list_tasks(dates: TaskDates):
     """call that function if user asked you to list all the tasks"""
-    request_body = {'action': 'list_tasks'}
+    from todoist_tasks import get_tasks_in_date_range
+    # if start_date available, list tasks in date range
+    if dates['start_date']:
+        tasks = get_tasks_in_date_range(dates['start_date'], dates['end_date'])
+        tasks = ", ".join(tasks)
+        sys.stdout.write(f"Tasks in date range: {tasks}")
+    request_body = {'action': 'say_tasks', 'tasks': tasks}
     requests.post(task_hook, json=request_body)
 
 
@@ -72,6 +90,7 @@ def add_info(information: str):
     """Add information piece to memory base to remember it. call that function if user provided affirmative statement."""
     request_body = {'action': 'add_memory', 'memory': information, 'id': str(uuid.uuid4())}
     requests.post(momories_hook, json=request_body)
+
 
 def add_friend(friends_data: FriendsData):
     """Add friend to friends list."""
@@ -102,3 +121,5 @@ def tool_choice(user_input):
     function_name = output["name"]
     sys.stdout.write(f"LLM returned:\n{output}\n")
     globals()[function_name](**output["arguments"])
+
+tool_choice("pokaż zadania na jutro")
