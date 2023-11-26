@@ -2,12 +2,14 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains.openai_functions import create_openai_fn_runnable
 from langchain.pydantic_v1 import BaseModel, Field
+from langchain.schema import StrOutputParser
 from typing import Optional
 import requests
 from datetime import datetime
 import uuid
 import telegram_con
 import sys
+import json
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -64,6 +66,24 @@ class TaskDates(BaseModel):
     )
 
 
+def chat(message: str):
+    """Default function. Call it every time when no other function fits. Responds for the conversation with LLM."""
+    # load prompt from json file
+    with open('prompt.json', 'r') as f:
+        prompt = json.load(f)
+    prompt.append(("user", message))
+    prompt_template = ChatPromptTemplate.from_messages(prompt)
+    llm = ChatOpenAI(temperature=0.7, model="gpt-4-1106-preview")
+    chain = prompt_template | llm | StrOutputParser()
+    response = chain.invoke({"message": message})
+    prompt.append(("system", response))
+    # save prompt as json file
+    with open('prompt.json', 'w') as f:
+        f.write(json.dumps(prompt))
+
+    telegram_con.send_msg(response)
+
+
 def add_task(name: str, description: str, date: OptionalDate):
     """Add task to todo list."""
     request_body = {'action': 'add_task', 'name': name, 'description': description}
@@ -87,7 +107,7 @@ def list_tasks(dates: TaskDates):
 
 
 def add_info(information: str):
-    """Add information piece to memory base to remember it. call that function if user provided affirmative statement."""
+    """Add information piece to memory base to remember it. call that function if user provided affirmative statement with some info."""
     request_body = {'action': 'add_memory', 'memory': information, 'id': str(uuid.uuid4())}
     requests.post(momories_hook, json=request_body)
 
@@ -107,19 +127,22 @@ def add_friend(friends_data: FriendsData):
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are , Grigorij's personal assistant. "
+        ("system", f"You are Szarik, Grigorij's personal assistant. "
                    f"Remember, today is {datetime.today().strftime('%d-%m-%Y')}."),
         ("user", "User input:'''{input}'''"),
     ]
 )
-runnable = create_openai_fn_runnable([add_task, list_tasks, add_info, add_friend], llm, prompt)
+runnable = create_openai_fn_runnable([chat, add_task, list_tasks, add_info, add_friend], llm, prompt)
 
 
 def tool_choice(user_input):
     output = runnable.invoke({"input": user_input})
+    print(output)
     # run function
     function_name = output["name"]
     sys.stdout.write(f"LLM returned:\n{output}\n")
     globals()[function_name](**output["arguments"])
 
-tool_choice("pokaż zadania na jutro")
+
+if __name__ == '__main__':
+    tool_choice("Tell me a joke")
