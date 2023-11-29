@@ -21,7 +21,10 @@ airtable_token = os.getenv('AIRTABLE_API_TOKEN')
 task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
+say_hook = 'https://hook.eu1.make.com/2q6y3iejmidmbryuyepgslhpjtiif4qn'
 
+conversation_id = ''
+airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
 def add_task(name: str, description: str, date=None):
     """Add task to todo list."""
@@ -40,8 +43,8 @@ def list_tasks(start_date, end_date):
         tasks = get_tasks_in_date_range(start_date, end_date)
         tasks = ", ".join(tasks)
         sys.stdout.write(f"Tasks in date range: {tasks}")
-    request_body = {'action': 'say_tasks', 'tasks': tasks}
-    requests.post(task_hook, json=request_body)
+    request_body = {'message': tasks}
+    requests.post(say_hook, json=request_body)
 
 
 def add_info(information: str):
@@ -61,6 +64,10 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
     sys.stdout.write(str(request_body))
     requests.post(friends_hook, json=request_body)
 
+def new_conversation():
+    global conversation_id
+    conversation_id = str(uuid.uuid4())
+    airtable.insert({'uuid': conversation_id, 'Conversation': '[]'})
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
 prompt = ChatPromptTemplate.from_messages(
@@ -197,8 +204,9 @@ def tool_choice_old(user_input):
 def tool_choice(user_input):
     client = OpenAI()
 
-    airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
-    messages = airtable.search('uuid', 'dzik')[0]['fields']['Conversation']
+    if not conversation_id:
+        new_conversation()
+    messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
     messages = json.loads(messages)
 
     messages.append({
@@ -234,10 +242,10 @@ def tool_choice(user_input):
         # remove system message
         messages.pop(0)
         # save prompt as json file
-        airtable.update_by_field('uuid', 'dzik', {'Conversation': json.dumps(messages)})
+        airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
 
         telegram_con.send_msg(response_content)
 
 
 if __name__ == '__main__':
-    tool_choice("Tak, porozmawiajmy")
+    tool_choice("CO umiesz zrobić?")
