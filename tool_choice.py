@@ -1,8 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains.openai_functions import create_openai_fn_runnable
-from langchain.pydantic_v1 import BaseModel, Field
-from typing import Optional
 from openai import OpenAI
 import requests
 from datetime import datetime
@@ -47,9 +45,13 @@ def list_tasks(start_date, end_date):
     requests.post(say_hook, json=request_body)
 
 
-def add_info(information: str):
+def add_info(information: str, name=None, link=None):
     """Add information piece to memory base to remember it. call that function if user provided affirmative statement with some info."""
-    request_body = {'action': 'add_memory', 'memory': information, 'id': str(uuid.uuid4())}
+    request_body = {'action': 'add_memory', 'info': information, 'id': str(uuid.uuid4())}
+    if name:
+        request_body['name'] = name
+    if link:
+        request_body['link'] = link
     requests.post(momories_hook, json=request_body)
 
 
@@ -69,15 +71,6 @@ def new_conversation():
     conversation_id = str(uuid.uuid4())
     airtable.insert({'uuid': conversation_id, 'Conversation': '[]'})
 
-llm = ChatOpenAI(temperature=0, model="gpt-4-1106-preview")
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", f"You are Szarik, Grigorij's personal assistant. "
-                   f"Remember, today is {datetime.today().strftime('%m/$d/%Y')}."),
-        ("user", "User input:'''{input}'''"),
-    ]
-)
-runnable = create_openai_fn_runnable([add_task, list_tasks, add_info, add_friend], llm, prompt)
 
 tools = [
     {
@@ -191,16 +184,6 @@ tools = [
     },
 ]
 
-def tool_choice_old(user_input):
-    output = runnable.invoke({"input": user_input})
-    print(output)
-    # run function
-    function_name = output["name"]
-    sys.stdout.write(f"LLM returned:\n{output}\n")
-    print(output["arguments"])
-    globals()[function_name](**output["arguments"])
-
-
 def tool_choice(user_input):
     client = OpenAI()
 
@@ -248,4 +231,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("CO umiesz zrobić?")
+    tool_choice("Zapamiętaj to https://yep.so/ - pomaga szybko zbudować stronkę produktu (landing page), która jest wystawiana na serwerze")
