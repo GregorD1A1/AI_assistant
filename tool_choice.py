@@ -33,6 +33,8 @@ def add_task(name: str, description: str, date=None):
 
     requests.post(task_hook, json=request_body)
 
+    return f"Added task {name}"
+
 
 def list_tasks(start_date, end_date):
     """call that function if user asked you to list all the tasks"""
@@ -57,7 +59,10 @@ def add_info(information: str, name=None, link=None):
         request_body['name'] = name
     if link:
         request_body['link'] = link
-    requests.post(momories_hook, json=request_body)
+    response = requests.post(momories_hook, json=request_body)
+
+    if response.status_code == 200:
+        return f"Added information {information}"
 
 
 def add_friend(name: str, description: str, tags: str, city=None, contact=None):
@@ -73,7 +78,6 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
     # check if response 200
     if response.status_code == 200:
         return f"Added friend {name}"
-
 
 
 def new_conversation():
@@ -210,7 +214,7 @@ tools = [
 
 def tool_choice(user_input):
     client = OpenAI()
-
+    
     if not conversation_id:
         new_conversation()
     messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
@@ -232,8 +236,7 @@ def tool_choice(user_input):
     response_message = response.choices[0].message
     response_content = response_message.content
     tool_calls = response_message.tool_calls
-    print("Tautaj patrzaj:")
-    print(response_message)
+
     if tool_calls:
         messages.append(response_message)
         # Step 4: send the info for each function call and function response to the model
@@ -241,7 +244,6 @@ def tool_choice(user_input):
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
             print(function_name)
-            print(function_args)
             funct_response = globals()[function_name](**function_args)
             messages.append({
                 "role": "tool",
@@ -266,8 +268,11 @@ def tool_choice(user_input):
         messages.append({"role": "assistant", "content": response_content})
         # remove system message
         messages.pop(0)
-        # remove all messages of type "ChatCompletionMessage"
+        # remove all messages of type other than dict
         messages = [message for message in messages if isinstance(message, dict)]
+        # remove all messages of if message['role'] == 'tool_call'
+        messages = [message for message in messages if message['role'] != 'tool']
+
         # save prompt as json file
         print(messages)
         airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
@@ -276,4 +281,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("Dodaj kolegę Dzik Dinożarl")
+    tool_choice("Dopowiedz bajkę")
