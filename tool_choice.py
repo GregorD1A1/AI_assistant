@@ -1,6 +1,7 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain.chains.openai_functions import create_openai_fn_runnable
+from todoist_tasks import edit_task
+from todoist_tasks import get_tasks_in_date_range
 from openai import OpenAI
 import requests
 from datetime import datetime
@@ -35,14 +36,18 @@ def add_task(name: str, description: str, date=None):
 
 def list_tasks(start_date, end_date):
     """call that function if user asked you to list all the tasks"""
-    from todoist_tasks import get_tasks_in_date_range
     # if start_date available, list tasks in date range
     if start_date and end_date:
         tasks = get_tasks_in_date_range(start_date, end_date)
         tasks = ", ".join(tasks)
         sys.stdout.write(f"Tasks in date range: {tasks}")
-    request_body = {'message': tasks}
-    requests.post(say_hook, json=request_body)
+
+    return tasks
+
+def edit_task(task_id, name=None, description=None, date=None):
+    """call that function if user asked you to edit task"""
+
+    response = edit_task(task_id, name, description, date)
 
 
 def add_info(information: str, name=None, link=None):
@@ -64,12 +69,19 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
     if contact:
         request_body['contact'] = contact
     sys.stdout.write(str(request_body))
-    requests.post(friends_hook, json=request_body)
+    response = requests.post(friends_hook, json=request_body)
+    # check if response 200
+    if response.status_code == 200:
+        return f"Added friend {name}"
+
+
 
 def new_conversation():
     global conversation_id
     conversation_id = str(uuid.uuid4())
     airtable.insert({'uuid': conversation_id, 'Conversation': '[]'})
+
+    return "Started new conversation"
 
 
 tools = [
@@ -182,6 +194,18 @@ tools = [
             },
         },
     },
+    {
+        "type": "function",
+        "function":
+        {
+            "name": "new_conversation",
+            "description": "Start new conversation.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+            },
+        },
+    },
 ]
 
 def tool_choice(user_input):
@@ -207,28 +231,49 @@ def tool_choice(user_input):
     )
     response_message = response.choices[0].message
     response_content = response_message.content
-    print(response_content)
     tool_calls = response_message.tool_calls
+    print("Tautaj patrzaj:")
+    print(response_message)
     if tool_calls:
-        messages.append(response_message)  # extend conversation with assistant's reply
+        messages.append(response_message)
         # Step 4: send the info for each function call and function response to the model
         for tool_call in tool_calls:
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
             print(function_name)
             print(function_args)
-            globals()[function_name](**function_args)
+            funct_response = globals()[function_name](**function_args)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "name": function_name,
+                "content": funct_response
+            })
+
+        second_response = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=messages,
+            temperature=0.7,
+        )
+        response_message = second_response.choices[0].message
+        response_content = response_message.content
+
+
 
     # save conversation history
     if response_content:
+        print(response_content)
         messages.append({"role": "assistant", "content": response_content})
         # remove system message
         messages.pop(0)
+        # remove all messages of type "ChatCompletionMessage"
+        messages = [message for message in messages if isinstance(message, dict)]
         # save prompt as json file
+        print(messages)
         airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
 
         telegram_con.send_msg(response_content)
 
 
 if __name__ == '__main__':
-    tool_choice("Zapamiętaj to https://yep.so/ - pomaga szybko zbudować stronkę produktu (landing page), która jest wystawiana na serwerze")
+    tool_choice("Dodaj kolegę Dzik Dinożarl")
