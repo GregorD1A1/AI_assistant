@@ -44,7 +44,7 @@ def list_tasks(start_date, end_date):
         tasks = ", ".join(tasks)
         sys.stdout.write(f"Tasks in date range: {tasks}")
 
-    return tasks
+    return f"all the tasks: '{tasks}'"
 
 def edit_task(task_id, name=None, description=None, date=None):
     """call that function if user asked you to edit task"""
@@ -214,7 +214,7 @@ tools = [
 
 def tool_choice(user_input):
     client = OpenAI()
-    
+
     if not conversation_id:
         new_conversation()
     messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
