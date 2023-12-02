@@ -277,7 +277,7 @@ def tool_choice(user_input):
         print(messages)
         airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
 
-        telegram_con.send_msg(response_content)
+        telegram_con.send_voice(response_content)
 
 
 if __name__ == '__main__':
