@@ -31,9 +31,13 @@ def add_task(name: str, description: str, date=None):
     if date:
         request_body['date'] = date
 
-    requests.post(task_hook, json=request_body)
+    response = requests.post(task_hook, json=request_body)
+    print(response.json())
 
-    return f"Added task {name}"
+    if response.status_code == 200 and response.json()['success']:
+        return f"Added task {name}"
+    else:
+        return "Wasn't added task. Something went wrong"
 
 
 def list_tasks(start_date, end_date):
@@ -233,7 +237,7 @@ def tool_choice(user_input):
 
     messages.append({
       "role": "system",
-      "content": f"You are Szarik, Grigorij's personal assistant. Remember, today is {datetime.today().strftime('%d.%m.%Y')}."
+      "content": f"You are Szarik, Grigorij's personal assistant. Today is {datetime.today().strftime('%d.%m.%Y')} d.m.Y."
                  f"Your responses are short and concise."
     })  # przenieść to na początek
     messages.append({"role": "user", "content": user_input})
@@ -293,4 +297,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("Pokaż zadania na jutro")
+    tool_choice("Dodaj zadanie xddkochać koty?")
