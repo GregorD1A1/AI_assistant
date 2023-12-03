@@ -15,9 +15,11 @@ def execute():
 
 
 def search_DuckDuckGo(query):
-    from langchain.tools import DuckDuckGoSearchRun, DuckDuckGoSearchResults
-    search = DuckDuckGoSearchResults()
-    return search.run(query)
+    from duckduckgo_search import DDGS
+    with DDGS() as ddgs:
+        results = [r for r in ddgs.text(query, max_results=4)]
+
+    return results
 
 
 @app.route('/aidevs_api', methods=['POST'])
@@ -30,7 +32,7 @@ def aidevs_api():
     client = OpenAI()
 
 
-    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return url only, without any additional informations. Use Polish."}, {"role": "user", "content": f"User:'''{question}'''"}]
+    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Care to make query include all needed informations. Return url only, without any additional informations. Use Polish."}, {"role": "user", "content": f"User:'''{question}'''"}]
     tools = [
         {
             "type": "function",
