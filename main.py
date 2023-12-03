@@ -30,7 +30,7 @@ def aidevs_api():
     client = OpenAI()
 
 
-    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return answer only, without additional informations."}, {"role": "user", "content": f"User:'''{question}'''"}]
+    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return url only, without any additional informations."}, {"role": "user", "content": f"User:'''{question}'''"}]
     tools = [
         {
             "type": "function",
