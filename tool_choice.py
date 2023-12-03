@@ -147,7 +147,7 @@ tools = [
         "function":
         {
             "name": "edit_task",
-            "description": "Edit task.",
+            "description": "Edit task data if some parameters were changed",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -168,7 +168,7 @@ tools = [
                 "required": ["name"],
             },
         },
-    }
+    },
     {
         "type": "function",
         "function":
