@@ -68,7 +68,8 @@ def aidevs_api():
             function_name = tool_calls[0].function.name
             function_args = json.loads(tool_calls[0].function.arguments)
             info = globals()[function_name](**function_args)
-            sys.stdout.write(info)
+            sys.stdout.write(function_args + "\n")
+            sys.stdout.write(info + "\n")
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
@@ -86,7 +87,7 @@ def aidevs_api():
 
 
     response = json.dumps({'reply': response_content})
-    sys.stdout.write(response)
+    sys.stdout.write(response + "\n")
 
     return response
 
