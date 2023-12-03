@@ -14,10 +14,10 @@ def execute():
     return "ok"
 
 
-def search_DuckDuckGo(information):
+def search_DuckDuckGo(query):
     from langchain.tools import DuckDuckGoSearchRun, DuckDuckGoSearchResults
     search = DuckDuckGoSearchResults()
-    return search.run(information)
+    return search.run(query)
 
 
 @app.route('/aidevs_api', methods=['POST'])
@@ -41,13 +41,14 @@ def aidevs_api():
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "information": {
+                            "query": {
                                 "type": "string",
-                                "description": "information to search",
+                                "description": "query to search in google. Provide here only denominator information to"
+                                               "search, do not provide any actions or verbs. ",
                             },
                             "unit": {"type": "string"},
                         },
-                        "required": ["information"],
+                        "required": ["query"],
                     },
                 },
         },
