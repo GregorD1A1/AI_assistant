@@ -287,6 +287,7 @@ def tool_choice(user_input):
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
             print(function_name)
+            print(function_args)
             funct_response = globals()[function_name](**function_args)
             messages.append({
                 "role": "tool",
