@@ -293,4 +293,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("DOdaj zadanie 'test' na jutro o 12")
+    tool_choice("Pokaż zadania na jutro")
