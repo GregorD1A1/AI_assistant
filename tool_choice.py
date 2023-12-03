@@ -51,10 +51,10 @@ def list_tasks(start_date, end_date):
     return f"all the tasks: '{tasks}'"
 
 
-def edit_task(task_id, name=None, description=None, date=None):
+def edit_task(name, new_name=None, description=None, date=None):
     """call that function if user asked you to edit task"""
 
-    response = correct_task(task_id, name, description, date)
+    response = correct_task(name, new_name, description, date)
     sys.stdout.write("If task edited:")
     sys.stdout.write(response)
 
@@ -142,6 +142,33 @@ tools = [
             },
         },
     },
+    {
+        "type": "function",
+        "function":
+        {
+            "name": "edit_task",
+            "description": "Edit task.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Exact name of task",
+                    },
+                    "new_ name": {
+                        "type": "string",
+                    },
+                    "description": {
+                        "type": "string",
+                    },
+                    "date": {
+                        "type": "string",
+                    },
+                },
+                "required": ["name"],
+            },
+        },
+    }
     {
         "type": "function",
         "function":
