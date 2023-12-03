@@ -27,7 +27,7 @@ def get_tasks_in_date_range(start_date, end_date):
     return tasks_in_date_range
 
 
-def edit_task(name, new_name=None, description=None, date=None):
+def correct_task(name, new_name=None, description=None, date=None):
     tasks = api.get_tasks(project_id=personal_project_id)
 
     task = [task for task in tasks if task.content == name][0]

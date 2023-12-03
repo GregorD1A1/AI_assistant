@@ -1,6 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from todoist_tasks import edit_task
+from todoist_tasks import correct_task
 from todoist_tasks import get_tasks_in_date_range
 from openai import OpenAI
 import requests
@@ -24,6 +24,7 @@ friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
 conversation_id = ''
 airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
+
 def add_task(name: str, description: str, date=None):
     """Add task to todo list."""
     request_body = {'action': 'add_task', 'name': name, 'description': description}
@@ -45,19 +46,20 @@ def list_tasks(start_date, end_date):
 
     return f"all the tasks: '{tasks}'"
 
+
 def edit_task(task_id, name=None, description=None, date=None):
     """call that function if user asked you to edit task"""
 
-    response = edit_task(task_id, name, description, date)
+    response = correct_task(task_id, name, description, date)
+    sys.stdout.write("If task edited:")
+    sys.stdout.write(response)
 
 
-def add_info(information: str, name=None, link=None):
+def add_info(information, type, tags, name=None):
     """Add information piece to memory base to remember it. call that function if user provided affirmative statement with some info."""
-    request_body = {'action': 'add_memory', 'info': information, 'id': str(uuid.uuid4())}
+    request_body = {'info': information, 'type': type, 'tags': tags, 'id': str(uuid.uuid4())}
     if name:
         request_body['name'] = name
-    if link:
-        request_body['link'] = link
     response = requests.post(momories_hook, json=request_body)
 
     if response.status_code == 200:
@@ -141,24 +143,34 @@ tools = [
         "function":
         {
             "name": "add_info",
-            "description": "Add information piece to memory base to remember it.",
+            "description":
+                "Add information piece about interesting service or piece of technichal knowledge Grigorij gained "
+                "to memory base. Use English.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "information": {
-                        "type": "string",
-                        "description": "information piece to remember",
-                    },
                     "name": {
                         "type": "string",
-                        "description": "name of service if some",
+                        "description": "name if needed",
                     },
-                    "link": {
+                    "information": {
                         "type": "string",
-                        "description": "url of service if some",
-                    }
+                        "description": "information piece to remember. Keep it short and concise with important data only.",
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "type of information, e.g. service, technical knowledge",
+                        "enum": ["Services", "Tech_knowledge"],
+                    },
+                    "tags": {
+                        "type": "string",
+                        "description":
+                            "Tags related to technology used or service functionality. "
+                            "Avoid general tags as 'programming', 'app development' etc., but specify concrete technology. "
+                            "Use small amount of tags only directly related. Separated by comma",
+                    },
                 },
-                "required": ["information"],
+                "required": ["information", "type", "tags"],
             },
         },
     },
@@ -280,4 +292,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("Dopowiedz bajkę")
+    tool_choice("Zapamiętaj, xdd.com - to jest strona z memami.")
