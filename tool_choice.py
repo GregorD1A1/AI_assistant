@@ -234,6 +234,7 @@ def tool_choice(user_input):
     messages.append({
       "role": "system",
       "content": f"You are Szarik, Grigorij's personal assistant. Remember, today is {datetime.today().strftime('%d.%m.%Y')}."
+                 f"Your responses are short and concise."
     })  # przenieść to na początek
     messages.append({"role": "user", "content": user_input})
     print(messages)

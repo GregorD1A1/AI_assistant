@@ -24,6 +24,9 @@ def get_tasks_in_date_range(start_date, end_date):
     tasks_in_date_range = [task.content for task in tasks if
                            task.due and start_date <= datetime.datetime.strptime(task.due.date, "%Y-%m-%d") <= end_date]
 
+    if not tasks_in_date_range:
+        tasks_in_date_range = ["No tasks"]
+
     return tasks_in_date_range
 
 
