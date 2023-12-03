@@ -20,7 +20,6 @@ airtable_token = os.getenv('AIRTABLE_API_TOKEN')
 task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
-say_hook = 'https://hook.eu1.make.com/2q6y3iejmidmbryuyepgslhpjtiif4qn'
 
 conversation_id = ''
 airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)

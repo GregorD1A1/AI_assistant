@@ -13,14 +13,15 @@ def execute():
 
     return "ok"
 
-notes = []
-def save_note(note):
-    global notes
-    notes.append(note)
+
+def search_DuckDuckGo(information):
+    from langchain.tools import DuckDuckGoSearchRun, DuckDuckGoSearchResults
+    search = DuckDuckGoSearchResults()
+    return search.run(information)
+
 
 @app.route('/aidevs_api', methods=['POST'])
 def aidevs_api():
-    global notes
     body = request.get_json()
     sys.stdout.write(f"Request received:\n{body}\n")
     question = body['question']
@@ -28,27 +29,25 @@ def aidevs_api():
     import json
     client = OpenAI()
 
-    # Step 1: send the conversation and available functions to the model
-    notesy = "\n".join(notes) if notes else ""
-    messages = [{"role": "system", "content": f"{notesy}\nAnswer question if user provided question; if it provided statement, save it as a note."}, {"role": "user", "content": f"User:'''{question}'''"}]
-    sys.stdout.write(notesy)
+
+    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return answer only, without additional informations."}, {"role": "user", "content": f"User:'''{question}'''"}]
     tools = [
         {
             "type": "function",
             "function":
                 {
-                    "name": "save_note",
-                    "description": "save information note if some information is provided",
+                    "name": "search_DuckDuckGo",
+                    "description": "search information on Internet",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "note": {
+                            "information": {
                                 "type": "string",
-                                "description": "information note",
+                                "description": "information to search",
                             },
                             "unit": {"type": "string"},
                         },
-                        "required": ["note"],
+                        "required": ["information"],
                     },
                 },
         },
@@ -64,15 +63,29 @@ def aidevs_api():
     tool_calls = response_message.tool_calls
     # Step 2: check if the model wanted to call a function
     if tool_calls:
-        function_name = tool_calls[0].function.name
-        function_args = json.loads(tool_calls[0].function.arguments)
-        globals()[function_name](**function_args)
+        messages.append(response_message)
+        for tool_call in tool_calls:
+            function_name = tool_calls[0].function.name
+            function_args = json.loads(tool_calls[0].function.arguments)
+            info = globals()[function_name](**function_args)
+            sys.stdout.write(info)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "name": function_name,
+                "content": info
+            })
+        second_response = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=messages,
+            temperature=0.7,
+        )
+        response_message = second_response.choices[0].message
+        response_content = response_message.content
 
-    reply = response_message.content
-    reply = "ok" if not reply else reply
 
 
-    response = json.dumps({'reply': reply})
+    response = json.dumps({'reply': response_content})
     sys.stdout.write(response)
 
     return response
