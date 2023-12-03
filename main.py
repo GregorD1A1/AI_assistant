@@ -30,7 +30,7 @@ def aidevs_api():
     client = OpenAI()
 
 
-    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return url only, without any additional informations."}, {"role": "user", "content": f"User:'''{question}'''"}]
+    messages = [{"role": "system", "content": f"Use internet search to provide answer for the next question. Return url only, without any additional informations. Use Polish."}, {"role": "user", "content": f"User:'''{question}'''"}]
     tools = [
         {
             "type": "function",
@@ -43,8 +43,7 @@ def aidevs_api():
                         "properties": {
                             "query": {
                                 "type": "string",
-                                "description": "query to search in google. Provide here only denominator information to"
-                                               "search, do not provide any actions or verbs. ",
+                                "description": "Consider the content of a query and extract the most crucial and descriptive keywords needed for a Google search. Focus on including all essential nouns, proper names, and adjectives that define the unique aspects of the query. Avoid any actions, verbs, or filler words that are not necessary for the search. Ensure that no important descriptive information is omitted. Use same language as user question."
                             },
                             "unit": {"type": "string"},
                         },
@@ -57,6 +56,7 @@ def aidevs_api():
     response = client.chat.completions.create(
         model="gpt-4",
         messages=messages,
+        temperature=0,
         tools=tools,
         tool_choice="auto",  # auto is default, but we'll be explicit
     )
