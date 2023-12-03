@@ -109,7 +109,7 @@ tools = [
                     },
                     "date": {
                         "type": "string",
-                        "description": "date in MM/DD/YYYY or MM/DD/YYYY HH:MM format if provided in user input. "
+                        "description": "date in DD.MM.YYYY or DD.MM.YYYY HH:MM format if provided in user input. "
                                        "null if no date provided in user input",
                     },
                 },
@@ -128,11 +128,11 @@ tools = [
                 "properties": {
                     "start_date": {
                         "type": "string",
-                        "description": "start date of task listing in MM/DD/YYYY",
+                        "description": "start date of task listing in DD.MM.YYYY",
                     },
                     "end_date": {
                         "type": "string",
-                        "description": "end date of task listing in MM/DD/YYYY",
+                        "description": "end date of task listing in DD.MM.YYYY",
                     },
                 },
             },
@@ -233,7 +233,7 @@ def tool_choice(user_input):
 
     messages.append({
       "role": "system",
-      "content": f"You are Szarik, Grigorij's personal assistant. Remember, today is {datetime.today().strftime('%m/%d/%Y')}."
+      "content": f"You are Szarik, Grigorij's personal assistant. Remember, today is {datetime.today().strftime('%d.%m.%Y')}."
     })  # przenieść to na początek
     messages.append({"role": "user", "content": user_input})
     print(messages)
@@ -292,4 +292,4 @@ def tool_choice(user_input):
 
 
 if __name__ == '__main__':
-    tool_choice("Zapamiętaj, xdd.com - to jest strona z memami.")
+    tool_choice("DOdaj zadanie 'test' na jutro o 12")
