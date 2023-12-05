@@ -1,13 +1,11 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from todoist_tasks import correct_task
-from todoist_tasks import get_tasks_in_date_range
+from tools.todoist_tasks import correct_task
+from tools.todoist_tasks import get_tasks_in_date_range
 from openai import OpenAI
 import requests
-from datetime import datetime
 import uuid
 from airtable import Airtable
-import telegram_con
 import sys
 import json
 import os
@@ -21,7 +19,6 @@ task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
 
-conversation_id = ''
 airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
 
@@ -83,14 +80,6 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
     # check if response 200
     if response.status_code == 200:
         return f"Added friend {name}"
-
-
-def new_conversation():
-    global conversation_id
-    conversation_id = str(uuid.uuid4())
-    airtable.insert({'uuid': conversation_id, 'Conversation': '[]'})
-
-    return "Started new conversation"
 
 
 tools = [
@@ -254,22 +243,8 @@ tools = [
     },
 ]
 
-def tool_choice(user_input):
+def tool_choice(messages):
     client = OpenAI()
-
-    if not conversation_id:
-        new_conversation()
-    messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
-    messages = json.loads(messages)
-
-    messages.append({
-      "role": "system",
-      "content": f"You are Szarik, Grigorij's personal assistant. Today is {datetime.today().strftime('%d.%m.%Y')} d.m.Y."
-                 f"Your responses are short and concise."
-    })  # przenieść to na początek
-    messages.append({"role": "user", "content": user_input})
-    print(messages)
-
     response = client.chat.completions.create(
         model="gpt-4-1106-preview",
         messages=messages,
@@ -286,8 +261,7 @@ def tool_choice(user_input):
         for tool_call in tool_calls:
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
-            print(function_name)
-            print(function_args)
+            sys.stdout.write(f"Function: {function_name}, arguments: {function_args}\n")
             funct_response = globals()[function_name](**function_args)
             messages.append({
                 "role": "tool",
@@ -304,24 +278,14 @@ def tool_choice(user_input):
         response_message = second_response.choices[0].message
         response_content = response_message.content
 
+    # remove all messages of type other than dict
+    #messages = [message for message in messages if isinstance(message, dict)]
+    # remove all messages of if message['role'] == 'tool_call'
+    #messages = [message for message in messages if message['role'] != 'tool']
+
+    return response_content
 
 
-    # save conversation history
-    if response_content:
-        print(response_content)
-        messages.append({"role": "assistant", "content": response_content})
-        # remove system message
-        messages.pop(0)
-        # remove all messages of type other than dict
-        messages = [message for message in messages if isinstance(message, dict)]
-        # remove all messages of if message['role'] == 'tool_call'
-        messages = [message for message in messages if message['role'] != 'tool']
-
-        # save prompt as json file
-        print(messages)
-        airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
-
-        telegram_con.send_voice(response_content)
 
 
 if __name__ == '__main__':
