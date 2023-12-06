@@ -31,7 +31,7 @@ def conversate(message):
     messages.insert(0, {
         "role": "system",
         "content": f"You are Szarik, Grigorij's personal assistant. Today is {datetime.today().strftime('%d.%m.%Y')} d.m.Y."
-                   f"Your responses are short and concise."
+                   f"Your responses are short and concise in Polish."
     })
     messages.append({"role": "user", "content": message})
 
