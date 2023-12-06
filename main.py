@@ -28,6 +28,7 @@ def aidevs_api():
     llm = ChatOpenAI(model='ft:gpt-3.5-turbo-1106:personal::8SkYi0jA', temperature=0)
     chain = prompt | llm | StrOutputParser()
     output = chain.invoke({'message': message})
+    sys.stdout.write(f"Output: {output}\n")
     response = {"reply": output}
 
     return response
