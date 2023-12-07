@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 @app.route('/', methods=['POST'])
 def execute():
     sys.stdout.write("Request received.\n")
-    logging.info('Dzik!')
+    logging.error('Dzik!')
     body = request.get_json()
     message = body['message']
     conversate(message)
