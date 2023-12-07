@@ -243,6 +243,7 @@ tools = [
     },
 ]
 
+
 def tool_choice(messages):
     client = OpenAI()
     response = client.chat.completions.create(
@@ -258,7 +259,6 @@ def tool_choice(messages):
 
     if tool_calls:
         messages.append(response_message)
-        # Step 4: send the info for each function call and function response to the model
         for tool_call in tool_calls:
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
@@ -276,8 +276,8 @@ def tool_choice(messages):
             messages=messages,
             temperature=0.7,
         )
-        response_message = second_response.choices[0].message
-        response_content = response_message.content
+        response_content = second_response.choices[0].message.content
+        print(f"Second response: {response_content}")
 
     # remove all messages of type other than dict
     #messages = [message for message in messages if isinstance(message, dict)]
@@ -286,8 +286,3 @@ def tool_choice(messages):
 
     return response_content
 
-
-
-
-if __name__ == '__main__':
-    tool_choice("Dodaj zadanie xddkochać koty?")

@@ -1,5 +1,3 @@
-import json
-
 from flask import Flask, request
 from conv_flow import conversate
 import sys

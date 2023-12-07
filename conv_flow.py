@@ -39,7 +39,7 @@ def conversate(message):
     sys.stdout.write(f"Tool will called: {tool_call}\n")
 
     if tool_call == 1:
-        response = tool_choice(messages)
+        response = tool_choice(messages.copy())
     else:
         response = respond(messages)
 
@@ -49,7 +49,6 @@ def conversate(message):
     # remove system message
     messages.pop(0)
 
-    print(messages)
     airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
 
 
