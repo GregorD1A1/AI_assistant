@@ -98,7 +98,7 @@ tools = [
                     },
                     "description": {
                         "type": "string",
-                        "description": "task description",
+                        "description": "task description. Do not invent informations you don't know",
                     },
                     "date": {
                         "type": "string",
@@ -256,6 +256,7 @@ def tool_choice(messages):
     response_content = response_message.content
     tool_calls = response_message.tool_calls
     sys.stdout.write(f"Tool calls: {tool_calls}\n")
+    sys.stdout.flush()
 
     if tool_calls:
         messages.append(response_message)
@@ -263,6 +264,7 @@ def tool_choice(messages):
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
             sys.stdout.write(f"Function: {function_name}, arguments: {function_args}\n")
+            sys.stdout.flush()
             funct_response = globals()[function_name](**function_args)
             messages.append({
                 "role": "tool",
