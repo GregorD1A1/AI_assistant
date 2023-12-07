@@ -75,6 +75,7 @@ def classify_message(text):
     chain = prompt | llm | StrOutputParser()
 
     output = chain.invoke({'text': text})
+    output = int(output)
 
     return output
 

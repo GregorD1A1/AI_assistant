@@ -254,6 +254,7 @@ def tool_choice(messages):
     response_message = response.choices[0].message
     response_content = response_message.content
     tool_calls = response_message.tool_calls
+    sys.stdout.write(f"Tool calls: {tool_calls}\n")
 
     if tool_calls:
         messages.append(response_message)
