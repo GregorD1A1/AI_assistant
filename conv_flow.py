@@ -35,13 +35,15 @@ def conversate(message):
     })
     messages.append({"role": "user", "content": message})
 
-    tool_call = classify_message(message)
+    #tool_call = classify_message(message)
+    tool_call = 1
     sys.stdout.write(f"Tool will called: {tool_call}\n")
 
     if tool_call == 1:
         response = tool_choice(messages.copy())
     else:
         response = respond(messages)
+
 
     telegram_con.send_voice(response)
 
