@@ -2,6 +2,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from tools.todoist_tasks import correct_task
 from tools.todoist_tasks import get_tasks_in_date_range
+from qdrant.qdrant_use import vector_search
 from openai import OpenAI
 import requests
 import uuid
@@ -80,6 +81,10 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
     # check if response 200
     if response.status_code == 200:
         return f"Added friend {name}"
+
+
+def search_friend(query):
+    return vector_search(query)
 
 
 tools = [
@@ -199,7 +204,7 @@ tools = [
         "function":
         {
             "name": "add_friend",
-            "description": "Add friend to friends list.",
+            "description": "Add friend to friends list. Use English only.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -232,6 +237,23 @@ tools = [
     {
         "type": "function",
         "function":
+            {
+                "name": "search_friend",
+                "description": "Find appropriate friends by vector search",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "descriptive search query in English, that contains details you looking for",
+                        },
+                    }
+                }
+            }
+    },
+    {
+        "type": "function",
+        "function":
         {
             "name": "new_conversation",
             "description": "Start new conversation.",
@@ -256,7 +278,6 @@ def tool_choice(messages):
     response_content = response_message.content
     tool_calls = response_message.tool_calls
     sys.stdout.write(f"Tool calls: {tool_calls}\n")
-    sys.stdout.flush()
 
     if tool_calls:
         messages.append(response_message)
@@ -264,8 +285,8 @@ def tool_choice(messages):
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
             sys.stdout.write(f"Function: {function_name}, arguments: {function_args}\n")
-            sys.stdout.flush()
             funct_response = globals()[function_name](**function_args)
+            sys.stdout.write(str(funct_response))
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
