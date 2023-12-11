@@ -83,8 +83,8 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
         return f"Added friend {name}"
 
 
-def search_friend(query):
-    return vector_search(query)
+def search(query, type):
+    return vector_search(query, type)
 
 
 tools = [
@@ -141,7 +141,7 @@ tools = [
         "function":
         {
             "name": "edit_task",
-            "description": "Edit task data if some parameters were changed",
+            "description": "Edit task data if parameters were changed",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -238,14 +238,19 @@ tools = [
         "type": "function",
         "function":
             {
-                "name": "search_friend",
-                "description": "Find appropriate friends by vector search",
+                "name": "search",
+                "description": "Find appropriate informations about Grigorij as his friends, his knowledege, services he likes and so on by vector search",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
                             "description": "descriptive search query in English, that contains details you looking for",
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "type of information to search",
+                            "enum": ["friend", "Tech_knowledge, External_services"],
                         },
                     }
                 }
@@ -256,7 +261,7 @@ tools = [
         "function":
         {
             "name": "new_conversation",
-            "description": "Start new conversation.",
+            "description": "Start new conversation",
             "parameters": {
                 "type": "object",
                 "properties": {},

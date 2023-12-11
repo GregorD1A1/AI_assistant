@@ -4,6 +4,7 @@ import sys
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['POST'])
 def execute():
     sys.stdout.write("Request received.\n")
