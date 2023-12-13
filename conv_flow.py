@@ -24,6 +24,7 @@ def conversate(message):
     global conversation_id
     if not conversation_id:
         conversation_id = new_conversation()
+    sys.stdout.write(f"Conversation ID: {conversation_id}\n")
     messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
     messages = json.loads(messages)
 
