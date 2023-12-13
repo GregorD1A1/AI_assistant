@@ -251,7 +251,8 @@ tools = [
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "descriptive search query in English, that contains details you looking for",
+                            "description": "descriptive search query in English, that contains all details you looking for and some context. "
+                                           "Example: 'Specialist in Javascript', 'service that can save notes and send them through email'.",
                         },
                         "type": {
                             "type": "string",
@@ -298,6 +299,7 @@ def tool_choice(messages):
             sys.stdout.write(f"Function: {function_name}, arguments: {function_args}\n")
             funct_response = globals()[function_name](**function_args)
             sys.stdout.write(str(funct_response))
+            sys.stdout.flush()
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,

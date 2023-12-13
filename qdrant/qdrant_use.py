@@ -3,10 +3,11 @@ from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Distan
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import StrOutputParser
-from dotenv import load_dotenv, find_dotenv
-import os
-from airtable import Airtable
 from langchain.embeddings import OpenAIEmbeddings
+from InstructorEmbedding import INSTRUCTOR
+from airtable import Airtable
+import os
+from dotenv import load_dotenv, find_dotenv
 
 
 load_dotenv(find_dotenv())
@@ -20,7 +21,8 @@ tools_collection = "tools"
 airtable_token = os.getenv('AIRTABLE_API_TOKEN')
 friends_table = Airtable('appGWWQkZT6s8XWoj', 'tblRws3jW42T7BteV', airtable_token)
 
-embeddings = OpenAIEmbeddings()
+embeddings_openai = OpenAIEmbeddings()
+embeddings_opensorce = INSTRUCTOR('hkunlp/instructor-large')
 
 
 def create_collection_and_upsert(collection, type):
@@ -32,7 +34,7 @@ def create_collection_and_upsert(collection, type):
     if not is_indexed:
         qdrant.create_collection(
             collection,
-            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
             on_disk_payload=True
         )
 
@@ -51,7 +53,7 @@ def upsert_data(collection, type):
     for row in rows:
         row = row['fields']
         row['type'] = type
-        embedding = embeddings.embed_query(row['content'])
+        embedding = embeddings_opensorce.encode(row['content'])
         points.append({
             'id': row['id'],
             'payload': row,
@@ -68,7 +70,10 @@ def upsert_data(collection, type):
 
 
 def vector_search(query, type):
-    query_embedding = embeddings.embed_query(query)
+    # for ada embedding
+    #query_embedding = embeddings_openai.embed_query(query)
+    # for instructor embedding
+    query_embedding = embeddings_opensorce.encode(query)
     results = qdrant.search(
         collection_name=memory_collection,
         query_vector=query_embedding,
@@ -77,6 +82,7 @@ def vector_search(query, type):
         ),
         limit=3,
     )
+    print(results)
     rerank_results = rerank_filter(query, results)
     print(rerank_results)
     search_output = ''
@@ -94,7 +100,9 @@ def rerank_filter(query, results):
     batch = []
     for result in results:
         batch.append({'query': query, 'result': result.payload['content']})
-    prompt = "You get query with some information about friend. Check is provided friend descriptionis match for a query.\n###\nQuery:\n'''{query}'''\n\nDescription:\n'''{result}'''\n\nReturn '1' if match or '0' if not and nothing else"
+    prompt = ("Check if provided record answers query:"
+              "\n###\nQuery:\n'''{query}'''\n\nRecord:\n'''{result}'''\n\nReturn '1' if answers or '0' if not. "
+              "You are strictly forbidden to return anything else except '0' or '1'")
     prompt_template = PromptTemplate.from_template(prompt)
     llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0)
     chain = prompt_template | llm | StrOutputParser()
@@ -104,5 +112,5 @@ def rerank_filter(query, results):
 
 
 if __name__ == '__main__':
-    #create_collection_and_upsert(memory_collection, 'friend')
-    print(vector_search('AI devs course', 'friend'))
+    create_collection_and_upsert(memory_collection, 'friend')
+    #print(vector_search('friend who is good in PHP', 'friend'))
