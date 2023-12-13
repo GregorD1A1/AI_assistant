@@ -15,19 +15,15 @@ from openai import OpenAI
 
 load_dotenv(find_dotenv())
 airtable_token = os.getenv('AIRTABLE_API_TOKEN')
-airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
-
-conversation_id = ''
+airtable_conversations = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
 
 def conversate(message):
-    global conversation_id
-    if not conversation_id:
-        conversation_id = new_conversation()
+    messages = airtable_conversations.get_all()[-1]['fields']['Conversation']
+    messages = json.loads(messages)
+    conversation_id = airtable_conversations.get_all(sort="id_nr")[-1]['fields']['id_nr']
     sys.stdout.write(f"Conversation ID: {conversation_id}\n")
     sys.stdout.flush()
-    messages = airtable.match('uuid', conversation_id)['fields']['Conversation']
-    messages = json.loads(messages)
 
     # insert on the beginning of list
     messages.insert(0, {
@@ -39,7 +35,6 @@ def conversate(message):
 
     #tool_call = classify_message(message)
     tool_call = 1
-    sys.stdout.write(f"Tool will called: {tool_call}\n")
 
     if tool_call == 1:
         response = tool_choice(messages.copy())
@@ -53,7 +48,7 @@ def conversate(message):
     # remove system message
     messages.pop(0)
 
-    airtable.update_by_field('uuid', conversation_id, {'Conversation': json.dumps(messages)})
+    airtable_conversations.update_by_field('id_nr', conversation_id, {'Conversation': json.dumps(messages)})
 
 
 def respond(messages):
@@ -86,12 +81,6 @@ def classify_message(text):
 
     return output
 
-
-def new_conversation():
-    conversation_id = str(uuid.uuid4())
-    airtable.insert({'uuid': conversation_id, 'Conversation': '[]'})
-
-    return conversation_id
 
 if __name__ == '__main__':
     respond([{"role": "user", "content": "Hello, how are you?"}])

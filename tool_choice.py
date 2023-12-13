@@ -20,8 +20,7 @@ task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
 
-airtable = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
-
+airtable_conversations = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
 def add_task(name: str, description: str, date=None):
     """Add task to todo list."""
@@ -85,6 +84,13 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
 
 def search(query, type):
     return vector_search(query, type)
+
+
+def new_conversation():
+    last_id = airtable_conversations.get_all(sort="id_nr")[-1]['fields']['id_nr']
+    airtable_conversations.insert({'id_nr': last_id + 1, 'Conversation': '[]'})
+
+    return "New conversation started"
 
 
 tools = [

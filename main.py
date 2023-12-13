@@ -8,6 +8,7 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def execute():
     sys.stdout.write("Request received.\n")
+    sys.stdout.flush()
     body = request.get_json()
     message = body['message']
     conversate(message)
