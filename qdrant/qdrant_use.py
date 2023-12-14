@@ -32,7 +32,6 @@ def create_collection_and_upsert(collection, type):
     is_indexed = next(
         (collection for collection in qdrant.get_collections().collections if collection.name == collection), None
     )
-    print(is_indexed)
     # Create empty collection if not exists
     if not is_indexed:
         qdrant.create_collection(
@@ -53,26 +52,27 @@ def upsert_data(collection, type):
     for table_type in types:
         print(table_type)
         rows = types[table_type].get_all()
-
-    points = []
-    # Generate embeddings and index data
-    for row in rows:
-        payload = row['fields']
-        payload['type'] = type
-        #embedding = embeddings_opensource.encode(payload['content'])
-        embedding = embeddings_openai.embed_query(payload['content'])
-        points.append({
-            'id': payload['uuid'],
-            'payload': payload,
-            'vector': embedding
-        })
-    qdrant.upsert(
-        collection_name=collection,
-        wait=True,
-        points=[
-            PointStruct(id=point['id'], vector=point['vector'], payload=point['payload']) for point in points
-        ]
-    )
+        print(rows)
+        points = []
+        # Generate embeddings and index data
+        for row in rows:
+            payload = row['fields']
+            payload['type'] = type
+            #embedding = embeddings_opensource.encode(payload['content'])
+            embedding = embeddings_openai.embed_query(payload['content'])
+            points.append({
+                'id': payload['uuid'],
+                'payload': payload,
+                'vector': embedding
+            })
+        print(points)
+        qdrant.upsert(
+            collection_name=collection,
+            wait=True,
+            points=[
+                PointStruct(id=point['id'], vector=point['vector'], payload=point['payload']) for point in points
+            ]
+        )
 
 
 def vector_search(query, type):
@@ -118,5 +118,5 @@ def rerank_filter(query, results):
 
 
 if __name__ == '__main__':
-    create_collection_and_upsert(memory_collection, 'service')
+    upsert_data(memory_collection, 'service')
     #print(vector_search('App for fine-tuning models in cloud', 'service'))
