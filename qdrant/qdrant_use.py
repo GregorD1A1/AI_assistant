@@ -58,7 +58,8 @@ def upsert_data(collection, type):
     for row in rows:
         payload = row['fields']
         payload['type'] = type
-        embedding = embeddings_openai.encode(payload['content'])
+        #embedding = embeddings_opensource.encode(payload['content'])
+        embedding = embeddings_openai.embed_query(payload['content'])
         points.append({
             'id': payload['uuid'],
             'payload': payload,
@@ -116,5 +117,5 @@ def rerank_filter(query, results):
 
 
 if __name__ == '__main__':
-    upsert_data(memory_collection, 'service')
+    create_collection_and_upsert(memory_collection, 'service')
     #print(vector_search('App for fine-tuning models in cloud', 'service'))
