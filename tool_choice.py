@@ -258,8 +258,10 @@ tools = [
                         },
                         "type": {
                             "type": "string",
-                            "description": "type of information to search",
-                            "enum": ["friend", "Tech_knowledge, External_services"],
+                            "description": "type of information to search."
+                                           "friend - search for friends, service - search for external services or tools, "
+                                           "tech_knowledge - Grigorij's technical knowledge",
+                            "enum": ["friend", "tech_knowledge, service"],
                         },
                     }
                 }

@@ -7,6 +7,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from InstructorEmbedding import INSTRUCTOR
 from airtable import Airtable
 import os
+import sys
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -90,7 +91,8 @@ def vector_search(query, type):
     )
     print(results)
     rerank_results = rerank_filter(query, results)
-    print(rerank_results)
+    sys.stdout.write(rerank_results)
+    sys.stdout.flush()
     search_output = ''
     for i, result in enumerate(results):
         if int(rerank_results[i]) == 1:
