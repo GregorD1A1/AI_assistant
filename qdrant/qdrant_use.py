@@ -37,7 +37,8 @@ def create_collection_and_upsert(collection, type):
     if not is_indexed:
         qdrant.create_collection(
             collection,
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            #vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
             on_disk_payload=True
         )
 
