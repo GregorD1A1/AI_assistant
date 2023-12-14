@@ -25,7 +25,7 @@ tech_knowledge_table = Airtable('appGWWQkZT6s8XWoj', 'tbl4nxFlrurlCFgrE', airtab
 types = {'friend': friends_table, 'service': services_table, 'tech_knowledge': tech_knowledge_table}
 
 embeddings_openai = OpenAIEmbeddings()
-embeddings_opensorce = INSTRUCTOR('hkunlp/instructor-large')
+#embeddings_opensorce = INSTRUCTOR('hkunlp/instructor-large')
 
 
 def create_collection_and_upsert(collection, type):
@@ -58,7 +58,7 @@ def upsert_data(collection, type):
     for row in rows:
         payload = row['fields']
         payload['type'] = type
-        embedding = embeddings_opensorce.encode(payload['content'])
+        embedding = embeddings_openai.encode(payload['content'])
         points.append({
             'id': payload['uuid'],
             'payload': payload,
@@ -75,9 +75,9 @@ def upsert_data(collection, type):
 
 def vector_search(query, type):
     # for ada embedding
-    #query_embedding = embeddings_openai.embed_query(query)
+    query_embedding = embeddings_openai.embed_query(query)
     # for instructor embedding
-    query_embedding = embeddings_opensorce.encode(query)
+    #query_embedding = embeddings_opensorce.encode(query)
     results = qdrant.search(
         collection_name=memory_collection,
         query_vector=query_embedding,
