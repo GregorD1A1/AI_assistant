@@ -20,6 +20,9 @@ tools_collection = "tools"
 
 airtable_token = os.getenv('AIRTABLE_API_TOKEN')
 friends_table = Airtable('appGWWQkZT6s8XWoj', 'tblRws3jW42T7BteV', airtable_token)
+services_table = Airtable('appGWWQkZT6s8XWoj', 'tblACGeBESjN8GUeX', airtable_token)
+tech_knowledge_table = Airtable('appGWWQkZT6s8XWoj', 'tbl4nxFlrurlCFgrE', airtable_token)
+types = {'friend': friends_table, 'service': services_table, 'tech_knowledge': tech_knowledge_table}
 
 embeddings_openai = OpenAIEmbeddings()
 embeddings_opensorce = INSTRUCTOR('hkunlp/instructor-large')
@@ -29,7 +32,7 @@ def create_collection_and_upsert(collection, type):
     is_indexed = next(
         (collection for collection in qdrant.get_collections().collections if collection.name == collection), None
     )
-
+    print(is_indexed)
     # Create empty collection if not exists
     if not is_indexed:
         qdrant.create_collection(
@@ -46,20 +49,21 @@ def create_collection_and_upsert(collection, type):
 
 
 def upsert_data(collection, type):
-    rows = friends_table.get_all()
+    for table_type in types:
+        print(table_type)
+        rows = types[table_type].get_all()
 
     points = []
     # Generate embeddings and index data
     for row in rows:
-        row = row['fields']
-        row['type'] = type
-        embedding = embeddings_opensorce.encode(row['content'])
+        payload = row['fields']
+        payload['type'] = type
+        embedding = embeddings_opensorce.encode(payload['content'])
         points.append({
-            'id': row['id'],
-            'payload': row,
+            'id': payload['uuid'],
+            'payload': payload,
             'vector': embedding
         })
-
     qdrant.upsert(
         collection_name=collection,
         wait=True,
@@ -112,5 +116,5 @@ def rerank_filter(query, results):
 
 
 if __name__ == '__main__':
-    create_collection_and_upsert(memory_collection, 'friend')
-    #print(vector_search('friend who is good in PHP', 'friend'))
+    upsert_data(memory_collection, 'service')
+    #print(vector_search('App for fine-tuning models in cloud', 'service'))
