@@ -2,7 +2,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from tools.todoist_tasks import correct_task
 from tools.todoist_tasks import get_tasks_in_date_range
-#from qdrant.qdrant_use import vector_search
+from qdrant.qdrant_use import vector_search
 from openai import OpenAI
 import requests
 import uuid
@@ -82,8 +82,8 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
         return f"Added friend {name}"
 
 
-#def search(query, type):
-#    return vector_search(query, type)
+def search(query, type):
+    return vector_search(query, type)
 
 
 def new_conversation():

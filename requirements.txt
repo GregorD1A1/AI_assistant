@@ -8,5 +8,5 @@ airtable-python-wrapper==0.15.3
 elevenlabs==0.2.26
 qdrant-client==1.6.9
 tiktoken==0.5.2
-#InstructorEmbedding==1.0.1
-#sentence-transformers==2.2.2
+InstructorEmbedding==1.0.1
+sentence-transformers==2.2.2
