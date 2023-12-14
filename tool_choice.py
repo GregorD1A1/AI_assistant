@@ -83,6 +83,8 @@ def add_friend(name: str, description: str, tags: str, city=None, contact=None):
 
 
 def search(query, type):
+    sys.stdout.write("Searching...")
+    sys.stdout.flush()
     return vector_search(query, type)
 
 
