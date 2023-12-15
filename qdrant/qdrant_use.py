@@ -77,6 +77,8 @@ def upsert_data(collection, type):
 
 
 def vector_search(query, type):
+    sys.stdout.write("embedding query...")
+    sys.stdout.flush()
     # for ada embedding
     query_embedding = embeddings_openai.embed_query(query)
     # for instructor embedding

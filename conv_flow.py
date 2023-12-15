@@ -21,6 +21,7 @@ airtable_conversations = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airt
 def conversate(message):
     messages = airtable_conversations.get_all()[-1]['fields']['Conversation']
     messages = json.loads(messages)
+    print(messages)
     conversation_id = airtable_conversations.get_all(sort="id_nr")[-1]['fields']['id_nr']
     sys.stdout.write(f"Conversation ID: {conversation_id}\n")
     sys.stdout.flush()
@@ -29,7 +30,7 @@ def conversate(message):
     messages.insert(0, {
         "role": "system",
         "content": f"You are Szarik, Grigorij's personal assistant. Today is {datetime.today().strftime('%d.%m.%Y')} d.m.Y."
-                   f"Your responses are short and concise in Polish."
+                   f"Your responses are short and concise in Polish with utf-8, if not suggested otherwise. "
     })
     messages.append({"role": "user", "content": message})
 
@@ -42,6 +43,7 @@ def conversate(message):
         response = respond(messages)
 
 
+    telegram_con.send_text(response)
     telegram_con.send_voice(response)
 
     messages.append({"role": "assistant", "content": response})
