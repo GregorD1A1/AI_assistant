@@ -36,6 +36,6 @@ def correct_task(name, new_name=None, description=None, date=None):
     task = [task for task in tasks if task.content == name][0]
     task_id = task.id
 
-    response = task.update(task_id, content=new_name, description=description, due=date)
+    response = api.update_task(task_id, content=new_name, description=description, due=date, )
 
     return response
