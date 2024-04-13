@@ -1,7 +1,7 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from tools.todoist_tasks import correct_task
-from tools.todoist_tasks import get_tasks_in_date_range
+from tools.todoist_tasks import add_task_todoist, get_tasks_in_date_range
 from qdrant.qdrant_use import vector_search
 from openai import OpenAI
 import requests
@@ -16,25 +16,16 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 airtable_token = os.getenv('AIRTABLE_API_TOKEN')
 
-task_hook = 'https://hook.eu1.make.com/spamxm6lfcrycw8tdajlwb2qifj0spok'
 momories_hook = 'https://hook.eu2.make.com/3y9bun2efpae5h05ki5u62gc18uqqmwl'
 friends_hook = 'https://hook.eu2.make.com/ui1m997zqbtugc4qm7925n3yr0om7oc5'
 
 airtable_conversations = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airtable_token)
 
 def add_task(name: str, description: str, date=None):
-    """Add task to todo list."""
-    request_body = {'action': 'add_task', 'name': name, 'description': description}
-    if date:
-        request_body['date'] = date
+    """Adds task to todo list."""
+    response = add_task_todoist(name, description, date)
+    return f"Added task: '{name}'"
 
-    response = requests.post(task_hook, json=request_body)
-    print(response.json())
-
-    if response.status_code == 200 and response.json()['success']:
-        return f"Added task {name}"
-    else:
-        return "Wasn't added task. Something went wrong"
 
 
 def list_tasks(start_date, end_date):

@@ -21,7 +21,6 @@ airtable_conversations = Airtable('appGWWQkZT6s8XWoj', 'tbllSz6YkqEAltse1', airt
 def conversate(message):
     messages = airtable_conversations.get_all()[-1]['fields']['Conversation']
     messages = json.loads(messages)
-    print(messages)
     conversation_id = airtable_conversations.get_all(sort="id_nr")[-1]['fields']['id_nr']
     sys.stdout.write(f"Conversation ID: {conversation_id}\n")
     sys.stdout.flush()
@@ -35,7 +34,7 @@ def conversate(message):
     messages.append({"role": "user", "content": message})
 
     #tool_call = classify_message(message)
-    tool_call = 0
+    tool_call = 1
 
     if tool_call == 1:
         response = tool_choice(messages.copy())
@@ -60,23 +59,10 @@ def respond(messages):
         model="gpt-4-1106-preview",
         messages=messages,
         temperature=0.8,
-        stream=True,
     )
-    #response_message = response.choices[0].message.content
-    sentence = ''
-    for chunk in response:
-        chunk_text = chunk.choices[0].delta.content
-        # glue chunks to string and print all the string when chunk is comma or end of sentence.
-        if chunk_text:
-            sentence += chunk_text
-        if chunk_text in [',', '.', '!', '?']:
-            print(sentence)
-            telegram_con.send_voice(sentence)
-            sentence = ''
+    response_message = response.choices[0].message.content
 
-
-
-    #return response_message
+    return response_message
 
 
 def classify_message(text):

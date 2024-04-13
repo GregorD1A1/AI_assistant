@@ -11,6 +11,11 @@ api = TodoistAPI(todoist_key)
 
 personal_project_id = 2302397862
 
+
+def add_task_todoist(name, description=None, date=None):
+    response = api.add_task(name, project_id=personal_project_id, description=description, date=date, section_id=137141450)
+    return response
+
 def get_tasks_in_date_range(start_date, end_date):
     # Convert dates to datetime objects
     start_date = datetime.datetime.strptime(start_date, "%d.%m.%Y")
